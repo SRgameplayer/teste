@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <title>Flappy Bird</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      width: 400px;
+      height: 300px;
+      margin: 0 auto;
+    }
+    .bird {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #000;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .pipe {
+      width: 200px;
+      height: 100px;
+      background-color: #fff;
+      position: absolute;
+    }
+    .pipe.top {
+      top: 0;
+    }
+    .pipe.bottom {
+      bottom: 0;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.12.0/p5.min.js"></script>
+  <script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const bird = {
+      width: 40,
+      height: 40,
+      y: canvas.height / 2,
+      speed: 0,
+    };
+    const pipes = [];
+
+    // Função para desenhar o pássaro
+    function drawBird() {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(bird.x, bird.y, bird.width, bird.height);
+    }
+
+    // Função para desenhar os canos
+    function drawPipes() {
+      for (const pipe of pipes) {
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(pipe.x, pipe.y, pipe.width, pipe.height);
+      }
+    }
+
+    // Função para atualizar o estado do jogo
+    function update() {
+      // Atualiza a posição do pássaro
+      bird.y += bird.speed;
+
+      // Verifica se o pássaro colidiu com algum cano
+      for (const pipe of pipes) {
+        if (
+          bird.x >= pipe.x - pipe.width / 2 &&
+          bird.x <= pipe.x + pipe.width / 2 &&
+          bird.y >= pipe.y - pipe.height &&
+          bird.y <= pipe.y + pipe.height
+        ) {
+          // O jogo acabou
+          gameOver();
+          return;
+        }
+      }
+
+      // Verifica se o pássaro passou por um cano
+      for (let i = pipes.length - 1; i >= 0; i--) {
+        const pipe = pipes[i];
+        if (pipe.y < 0) {
+          pipes.splice(i, 1);
+          // O pássaro passou por um cano
+          score++;
+        }
+      }
+
+      // Atualiza a velocidade do pássaro
+      bird.speed += gravity;
+    }
+
+    // Função que é chamada quando o jogo acaba
+    function gameOver() {
+      // Limpa a tela
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Desenha o texto de game over
+      ctx.fillStyle = "#fff";
+      ctx.font = "24px Arial";
+      ctx.fillText("Game Over", canvas.width / 2, canvas.height / 2);
+    }
+
+    // Função que é chamada quando o jogador pressiona a tecla espação
+    function jump() {
+      // O pássaro voa para cima
+      bird.speed = -10;
+    }
+
+    // Inicializa o jogo
+    window.addEventListener("keydown", (event) => {
+      if (event.keyCode === 32) {
+        jump();
+      }
